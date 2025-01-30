@@ -260,7 +260,7 @@ def GenWrtRdWeights( Src=None , Dst=None ,  RegridMethod="CONSERVE_2ND" , UseFil
     """
     This function returns the regridding objects (Regrid, srcField, dstField) used by ESMF.
     Src, Dst inputs (required) are code names for grids as recognized in 
-        PyRegridding/Utils/GridUtils.py [.gridInfo]
+        ../Utils/GridUtils.py [.gridInfo]
     UseFiles (required) decides whether weight files will be processed. 3 behaviors possible.
         UseFiles=False
             Simply generate the emsf regridding objects and return
@@ -275,7 +275,7 @@ def GenWrtRdWeights( Src=None , Dst=None ,  RegridMethod="CONSERVE_2ND" , UseFil
 
     import time
     import os
-    from PyRegridding.Utils import GridUtils as GrU
+    from Utils import GridUtils as GrU
 
     ##############################
     #  Begin ...
