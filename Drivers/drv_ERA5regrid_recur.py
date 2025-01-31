@@ -10,6 +10,9 @@ import subprocess as sp
 import update_config as uc
 import DrvRegrid as DR
 
+from Regridder import GlobalVarClass
+from Regridder.GlobalVarClass import Gv
+#
 ######################################################################
 # This function is called by PyBatch_ERA5regrid.csh, and
 # then may also resubmit PyBatch_ERA5regrid.csh after incrementing
@@ -37,6 +40,12 @@ def main():
 
     config = uc.read_config_yaml( file_path )
     print( config )
+
+    if ('Output_base_dir' in config):
+        Gv.output_base_dir = config['Output_base_dir']
+    if ('Output_abs_dir' in config):
+        Gv.output_abs_dir = config['Output_abs_dir']
+    
     theYear = config['TheProcYear']
     # Destination grid
     Dst=config['Dst']

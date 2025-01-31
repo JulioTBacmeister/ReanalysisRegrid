@@ -101,6 +101,10 @@ class VariableContainer:
         self.te_WO = None
         self.ts_extrap = None
 
+        # Used for output
+        #----------------------------------------------------------
+        self.output_base_dir = None
+        self.output_abs_dir = None
 
         
 Gv = VariableContainer()

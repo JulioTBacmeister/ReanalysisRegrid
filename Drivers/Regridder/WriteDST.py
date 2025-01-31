@@ -40,17 +40,23 @@ def write_netcdf( version='' ):
     v_ERA_xzCAM  = Gv.v_ERA_xzCAM
     w_ERA_xzCAM  = Gv.w_ERA_xzCAM
     
-    if (Gv.MySrc=="ERA5"):
-        SuperDir = "/glade/campaign/cgd/amp/juliob/ERA5"
-    elif (Gv.MySrc=="ERAI"):
-        SuperDir = "/glade/campaign/cgd/amp/juliob/ERAI"
-    else:
-        SuperDir = "/glade/campaign/cgd/amp/juliob/MiscRegridding"
-
     ntime = np.shape(pdTime_ERA)[0]
     print(ntime)
-    #Bdiro="/glade/derecho/scratch/juliob/ERA5/" + Gv.MyDst    
-    Bdiro=f"{SuperDir}/{Gv.MyDst}/{Gv.MyDstVgrid}"
+
+    if (Gv.output_base_dir is None) and (Gv.output_abs_dir is None):
+        user = os.getenv("USER")  
+        if (Gv.MySrc=="ERA5"):
+            SuperDir = f"/glade/campaign/cgd/amp/{user}/ERA5"
+        elif (Gv.MySrc=="ERAI"):
+            SuperDir = f"/glade/campaign/cgd/amp/{user}/ERAI"
+        else:
+            SuperDir = f"/glade/campaign/cgd/amp/{user}/MiscRegridding"
+        Bdiro=f"{SuperDir}/{Gv.MyDst}/{Gv.MyDstVgrid}"
+    elif (Gv.output_base_dir is not None) and (Gv.output_abs_dir is None):
+        Bdiro=f"{Gv.output_base_dir}/{Gv.MyDst}/{Gv.MyDstVgrid}"
+    elif (Gv.output_abs_dir is not None):
+        Bdiro=f"{Gv.output_abs_dir}"
+
     #######
     os.makedirs( Bdiro , exist_ok=True )
 
