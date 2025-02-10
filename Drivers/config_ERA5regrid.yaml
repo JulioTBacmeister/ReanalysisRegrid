@@ -1,12 +1,12 @@
-Dst: ne30np4
-DstVgrid: L93
-IC_for_pg: true
-Output_base_dir: 
+Dst: fv1x1
+DstVgrid: L83
+IC_for_pg: false
+Output_base_dir: /glade/derecho/scratch/juliob/era5-debugging/out-of-the-box/
 Resubmit: -1
 StepBy: month
 StepN: 1
 TheProcYear: -1
 day: 1
 hour: 0
-month: 2
+month: 12
 year: 1997

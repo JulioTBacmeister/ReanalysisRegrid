@@ -103,6 +103,9 @@ def gridInfo( grid=None , **kwargs ):
             # Read in CAM L93 vertical grid
             # The file below though poorly named is the correct one to use for L93
             VgridFile = f'{myGridFiles}/Vertical/GRID_93L_CAM7_OrigAB_c20240514.nc'
+        if (Vgrid == 'L83' ):
+            # Read in CAM L83 vertical grid
+            VgridFile = f'{myGridFiles}/Vertical/GRID_83L_CAM7_c20250210.nc'            
         if (Vgrid == 'L58' ):
             # Read in CAM L58 vertical grid
             VgridFile = f'{myGridFiles}/Vertical/GRID_48_taperstart10km_lowtop_BL10_v3p1_beta1p75.nc'
