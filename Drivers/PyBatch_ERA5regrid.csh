@@ -4,7 +4,8 @@
 ### Request one chunk of resources with N CPU and M GB of memory
 ##PBS -l select=1:ncpus=16:mem=1000GB
 ##PBS -l select=1:ncpus=4:mem=256GB
-#PBS -l select=1:ncpus=4:mem=64GB
+##PBS -l select=1:ncpus=4:mem=64GB
+#PBS -l select=1:ncpus=1:mem=64GB
 ### 
 ####PBS -l walltime=09:00:00
 #PBS -l walltime=02:00:00

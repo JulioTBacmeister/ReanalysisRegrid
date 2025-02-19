@@ -4,6 +4,9 @@ import sys
 import os
 
 
+print( "from inside GenRegrid.py")
+print( sys.path ) 
+
 import argparse as arg
 
 
@@ -33,9 +36,10 @@ from Utils import GridUtils as GrU
 from Utils import MakePressures as MkP
 # "ChatGPI version" --- 
 from Regridder import VertRegridFlexLL as vrg
-print( "Using Flexible parallel/serial VertRegrid ")
 
 from Utils import humiditycalcs as hum
+
+
 
 # Reload local packages that are under
 # development

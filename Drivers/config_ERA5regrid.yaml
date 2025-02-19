@@ -1,10 +1,10 @@
 Dst: fv1x1
 DstVgrid: L83
 IC_for_pg: false
-Output_base_dir: /glade/derecho/scratch/juliob/era5-debugging/out-of-the-box/
-Resubmit: -1
+Output_base_dir: /glade/derecho/scratch/juliob/era5-debugging/serial-vinterp/
+Resubmit: -2
 StepBy: month
-StepN: 1
+StepN: 0
 TheProcYear: -1
 day: 1
 hour: 0
