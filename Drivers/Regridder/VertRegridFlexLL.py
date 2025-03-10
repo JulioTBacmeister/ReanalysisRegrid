@@ -55,7 +55,7 @@ def VertRG( a_x , zSrc, zDst, Gridkey , fill_value='extrapolate', kind='linear' 
     print('nworkers available ',nworkers)
 
     #++ jtb - force serial code ....
-    nworkers = 1
+    # nworkers = 1
     
     if (nworkers>1):
         print('full loop pll-ized according to ChatGPT')
