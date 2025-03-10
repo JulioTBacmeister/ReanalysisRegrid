@@ -109,6 +109,9 @@ def gridInfo( grid=None , **kwargs ):
         if (Vgrid == 'L58' ):
             # Read in CAM L58 vertical grid
             VgridFile = f'{myGridFiles}/Vertical/GRID_48_taperstart10km_lowtop_BL10_v3p1_beta1p75.nc'
+        if (Vgrid == 'L68' ):
+            # Read in CAM L58 vertical grid
+            VgridFile = f'{myGridFiles}/Vertical/L68_grid.nc'
         if (Vgrid == 'L56_86km' ):
             # Read in a truncated WACCM (v6 70-level) grid with a top near 86km
             VgridFile = f'{myGridFiles}/Vertical/GRID_56L_CAM7_TruncatedWACCM-Top86km_c20240705.nc'
