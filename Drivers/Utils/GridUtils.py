@@ -295,6 +295,13 @@ def gridInfo( grid=None , **kwargs ):
         TopoFile = '/glade/work/juliob/ERA5-proc/ERA5interp/phis/ERA5_phis.nc'
         p_00 = 1.0
 
+    elif (grid == 'ERA5_720x1440'):
+        Hkey = 'yx'
+        type='grid'
+        scrip = '/glade/work/juliob/ERA5-proc/ERA5interp/grids/ERA5_720x1440_scrip.nc'
+        TopoFile = '/glade/work/juliob/ERA5-proc/ERA5interp/phis/ERA5_phis.nc'
+        p_00 = 1.0
+
     elif (grid == 'ERAI'):
         Hkey = 'yx'
         type='grid'
