@@ -74,7 +74,7 @@ def load_file(path):
     return ds
 
 
-def get_ERA5( year=2022, month=11, day=1, hour0=99):
+def get_ERA5( year=2022, month=11, day=1, hour0=99, frequency=1):
 
     try:
         Gv.MySrc
@@ -104,7 +104,8 @@ def get_ERA5( year=2022, month=11, day=1, hour0=99):
     print(monStr)
     print(ymdh) 
 
-    era5dir = "/glade/campaign/collections/rda/data/ds633.6/e5.oper.an.ml/"
+    #era5dir = "/glade/campaign/collections/rda/data/ds633.6/e5.oper.an.ml/" # obsolete 4/5/25????
+    era5dir = "/glade/campaign/collections/rda/data/d633006/e5.oper.an.ml/"
     wrkdir=era5dir+monStr+"/"
 
     print(Gv.dstTZHkey)
@@ -119,20 +120,6 @@ def get_ERA5( year=2022, month=11, day=1, hour0=99):
     wfile = wrkdir + 'e5.oper.an.ml.0_5_0_2_8_w.regn320sc.'+ymdh+'.nc'
     all_ERA_files = [ spfile , tfile, qfile, ufile, vfile, wfile ]
 
-    """
-    print( "Using DASK " )
-    # Create a list of delayed objects, one for each file
-    delayed_datasets = [load_file(path) for path in  all_ERA_files  ]
-    # Use dask.compute to load all of the datasets in parallel
-    datasets  = dask.compute(*delayed_datasets)
-    dsPS_ERA  = datasets[0] 
-    dsT_ERA   = datasets[1] 
-    dsQ_ERA   = datasets[2] 
-    dsU_ERA   = datasets[3] 
-    dsV_ERA   = datasets[4] 
-    dsW_ERA   = datasets[5] 
-
-    """
     #Serial read
     #--------------
     print( 'Serial read of data ' )
@@ -143,12 +130,22 @@ def get_ERA5( year=2022, month=11, day=1, hour0=99):
     dsU_ERA   = xr.open_mfdataset( ufile , data_vars='different', coords='different')
     dsV_ERA   = xr.open_mfdataset( vfile , data_vars='different', coords='different')
     dsW_ERA   = xr.open_mfdataset( wfile , data_vars='different', coords='different')
+
+    #--------------------------
+    # pick out 00,06,12,18Z
+    if (frequency == 6):
+        dsPS_ERA = dsPS_ERA.sel(time=np.isin(dsPS_ERA.time.dt.hour, [0, 6, 12, 18]))
+        dsT_ERA  = dsT_ERA.sel(time=np.isin(dsT_ERA.time.dt.hour, [0, 6, 12, 18]))
+        dsQ_ERA  = dsQ_ERA.sel(time=np.isin(dsQ_ERA.time.dt.hour, [0, 6, 12, 18]))
+        dsU_ERA  = dsU_ERA.sel(time=np.isin(dsU_ERA.time.dt.hour, [0, 6, 12, 18]))
+        dsV_ERA  = dsV_ERA.sel(time=np.isin(dsV_ERA.time.dt.hour, [0, 6, 12, 18]))
+        dsW_ERA  = dsW_ERA.sel(time=np.isin(dsW_ERA.time.dt.hour, [0, 6, 12, 18]))
+        
+    
     toc = time.perf_counter()
     print( all_ERA_files )
     pTime = f"Reading data vars for {ymdh} took  {toc - tic_overall:0.4f} seconds"
     print(pTime)
-
-   
 
     tic = time.perf_counter()
     Gv.ps_ERA = dsPS_ERA['SP'].values
@@ -188,8 +185,9 @@ def get_ERA5( year=2022, month=11, day=1, hour0=99):
         ymdhStr = ymdStr + ' ' + str( hour0 ).zfill(2)
     else:
         ymdhStr = ymdStr
-    PdTime_ERA = pd.date_range( ymdhStr , periods=nt,freq='H')
-    Gv.pdTime_ERA = pd.to_datetime( PdTime_ERA.values )
+    PdTime_ERA = pd.date_range( ymdhStr , periods=nt,freq='h')
+    #Gv.pdTime_ERA = pd.to_datetime( PdTime_ERA.values )
+    Gv.pdTime_ERA = pd.to_datetime( dsT_ERA['time'].values )
     
 
     #-----------------------------------------------
@@ -323,10 +321,10 @@ def get_ERAI( year=2022, month=11, day=1, hour0=99, interactive=False ):
 
     return rcode
 
-def get_Src( year=2022, month=11, day=1, hour0=99):
+def get_Src( year=2022, month=11, day=1, hour0=99, frequency=1 ):
     
     if (Gv.MySrc=='ERA5'):
-        faa =get_ERA5( year=year, month=month, day=day, hour0=hour0)
+        faa =get_ERA5( year=year, month=month, day=day, hour0=hour0, frequency=frequency )
         rcode=faa
     else:
         print('Aaaaaaaaaaaa')

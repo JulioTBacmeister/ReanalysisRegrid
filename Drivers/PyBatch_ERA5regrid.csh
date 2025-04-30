@@ -14,11 +14,9 @@
 ### Join output and error streams into single file
 #PBS -j oe
 
-
 module load conda
 
-conda activate npl-2024b
-
+conda activate npl-2025a
 
 #-------------------------------------
 # The Python code called below is
@@ -30,3 +28,4 @@ conda activate npl-2024b
 #--------------------------------------
 echo "Cruising .... "
 ./drv_ERA5regrid_recur.py
+

@@ -36,6 +36,7 @@ class scipy.interpolate.interp1d(x, y, kind='linear', axis=-1, copy=True, bounds
 
 Rdry = Con.Rdry()
 grav = Con.grav()
+vireps = Con.vireps()
 
 def interpolate_column(zSrcT_col, a_xT_col, zDstT_col, fill_value, kind):
     """Interpolate a single column of data."""
@@ -232,6 +233,70 @@ def BottomFill (a_zCAM , a_zERA, pmid_zCAM, ps_ERA, Gridkey ):
     return a_zCAMf
 
 
+def BottomFillZgrid ( htopo_ERA_xCAM=None, htopo_CAM=None, zgrido_CAM=None, a_CAM=None, Method=None, 
+                     lapse_rate=-6.5 * 1.e-3, fill_value=0., Gridkey=None ):
+
+    #-------------------------------------------------------------------------------------------------------
+    # Inputs.
+    #    htopo_ERA_xCAM (m) [time x horz] : ERA topography regridded onto CAM horz grid
+    #    htopo_CAM (m) [time x horz]      : ACtual CAM topo. Usually smoother than htopo_ERA_xCAM 
+    #    zgrido_CAM (m) [time x vert x horz] : midlayer heights in CAM
+    #    a_CAM (?) [time x vert x horz]   : CAM filed to 'repair' at subterranean points 
+    #-------------------------------------------------------------------------------------------------------
+    # CAM 'subterranean' points are where:
+    #    htopo_ERA_xCAM > htopo_CAM 
+    #
+    # This function doesn't do anything where CAM surface 
+    # is above ERA ( -> xCAM) surface. 
+    #-------------------------------------------------------------------------------------------------------
+
+    print( f"Fill method {Method}")
+    tic = time.perf_counter()
+
+    a_CAMf = copy.deepcopy(a_CAM)
+
+    if ( Gridkey == 'tzc' ):
+        nt,nz, ncol = np.shape( a_CAM )
+        for i in np.arange( nt ):
+            for c in np.arange( ncol ):
+                zoo=np.where( zgrido_CAM[i,:,c] < htopo_ERA_xCAM[i,c] )
+                lzoo=len( zoo[0] )
+                if (lzoo > 0):
+                    if (Method.lower()=='lapse_extrapolate'):
+                        for z in np.arange( start=0, stop=lzoo, step=1 ):
+                            a_CAMf[i,zoo[0][z],c] = a_CAMf[i,zoo[0][0],c] - lapse_rate*( zgrido_CAM[i,zoo[0][0],c]-zgrido_CAM[i,zoo[0][z],c] )
+                    if (Method.lower()=='extrapolate_to_zero'):
+                        gradient = a_CAMf[i,zoo[0][0],c] / ( zgrido_CAM[i,zoo[0][0],c]-htopo_CAM[i,c] )
+                        for z in np.arange( start=0, stop=lzoo, step=1 ):
+                            a_CAMf[i,zoo[0][z],c] = a_CAMf[i,zoo[0][0],c] - gradient*( zgrido_CAM[i,zoo[0][0],c]-zgrido_CAM[i,zoo[0][z],c] )
+                    if (Method.lower()=='fill'):
+                        for z in np.arange( start=0, stop=lzoo, step=1 ):
+                            a_CAMf[i,zoo[0][z],c] = fill_value
+                    
+                        
+    toc = time.perf_counter()
+    ProcTime = f" ... Bottom filling took {toc - tic:0.4f} seconds"
+    print(ProcTime)
+        
+
+    return a_CAMf
+
+
+def PsAdjust_simple( phis_ERA_xCAM=None, phis_CAM=None, ps_ERA_xCAM=None, te_ERA_xzCAM=None, q_ERA_xzCAM=None, Gridkey=None ):
+
+    # virtual temperature in terms of specific humidity
+    if (q_ERA_xzCAM is not None):
+        tevir = ( (q_ERA_xzCAM/vireps) + (1.- q_ERA_xzCAM ) )* te_ERA_xzCAM
+    else:
+        tevir =te_ERA_xzCAM
+
+    if ( Gridkey == 'tzc' ):
+        nt,nz, ncol = np.shape( te_ERA_xzCAM )
+        te_bot = tevir[:,nz-1,:]
+        dphis = phis_CAM - phis_ERA_xCAM
+        ps_CAM = ps_ERA_xCAM * np.exp( -dphis / (Con.Rdair()*te_bot) )
+
+    return ps_CAM
 
 def PsAdjust( phis, phis_CAM, ps, pm150, te150, Gridkey ):
 

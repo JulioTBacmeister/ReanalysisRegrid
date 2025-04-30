@@ -35,6 +35,14 @@ def mwdair():
     value = 28.966
     units = "kg kmole-1"
     return value
+def mwh2o():
+    value = 18.02
+    units = "kg kmole-1"
+    return value
+def vireps():
+    value = mwh2o()/mwdair()
+    units = "1"
+    return value
 def cpair():
     value= (7./2.)* avogadro()*boltzmann()/mwdair() # 1005.0
     units='J K-1 kg-1 '

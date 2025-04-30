@@ -33,6 +33,8 @@ class VariableContainer:
 
         self.doWilliamsonOlson=None
         self.RegridMethod=None
+        self.IC_for_pg = None
+        self.mpas_nudging = None
 
         self.p_00_ERA=None
         self.p_00_CAM=None
@@ -79,6 +81,13 @@ class VariableContainer:
         self.te_150 = None
         self.pmid_150 = None
         self.L150 = None
+
+        # Geopotential heights for MPAS
+        self.z3o_ERA = None
+        self.z3o_ERA_xCAM = None
+        self.z3e_ERA = None
+        self.zgrid_CAM = None
+        self.zgrido_CAM = None
 
         # Variables created by Regridder
         #----------------------------------------------------------

@@ -51,7 +51,7 @@ from Utils import GridUtils as GrU
 # be cleaned up
 #-------------------------------------------------------------
 
-def prep(Dst = 'ne30pg3', DstVgrid='L58',  Src='ERA5', WOsrf=False , RegridMethod="CONSERVE", IC_for_pg=False ):
+def prep(Dst = 'ne30pg3', DstVgrid='L58',  Src='ERA5', WOsrf=False , RegridMethod="CONSERVE", IC_for_pg=False, mpas_nudging=False, override_topofile_with=None ):
     #---------------------------------------------
     # This function sets-up variables and objects 
     # that are need for horizontal and vertical 
@@ -64,6 +64,9 @@ def prep(Dst = 'ne30pg3', DstVgrid='L58',  Src='ERA5', WOsrf=False , RegridMetho
     
     tic_overall = time.perf_counter()
     Gv.MyDst,Gv.MyDstVgrid,Gv.MySrc = Dst,DstVgrid,Src
+
+    Gv.IC_for_pg = IC_for_pg
+    Gv.mpas_nudging = mpas_nudging
 
     Gv.RegridMethod = RegridMethod
     Gv.doWilliamsonOlson = WOsrf
@@ -80,6 +83,15 @@ def prep(Dst = 'ne30pg3', DstVgrid='L58',  Src='ERA5', WOsrf=False , RegridMetho
     Gv.dst_TopoFile = DstInfo['TopoFile']
     Gv.dstVgridFile = DstInfo['VgridFile' ] 
 
+    # Override topofile with a user-specified one
+    #---------------------------------------------
+    if (override_topofile_with is not None):
+        print( f"User beware... Topofile is being overridden with - " )
+        print( f"{override_topofile_with}")
+        Gv.dst_TopoFile = override_topofile_with
+        
+
+    
     SrcInfo = GrU.gridInfo(Src)
     Gv.srcHkey = SrcInfo['Hkey']
     Gv.src_type =SrcInfo['type']
@@ -87,6 +99,8 @@ def prep(Dst = 'ne30pg3', DstVgrid='L58',  Src='ERA5', WOsrf=False , RegridMetho
     Gv.src_TopoFile = SrcInfo['TopoFile']
     Gv.p_00_ERA = SrcInfo['p_00']
     print( f"Used NEW, concise gridInfo function .... ...." )
+
+    
 
     # Set grid keys for Src ERA5 reanalysis
     Gv.srcTHkey  = 't'  + Gv.srcHkey
@@ -110,6 +124,8 @@ def prep(Dst = 'ne30pg3', DstVgrid='L58',  Src='ERA5', WOsrf=False , RegridMetho
     # lives in the neXXpg3 topo file under a different name:
     #      PHIS_gll
     # ----------------------------------------------
+    print(  "Why is this bombing ???" , flush=True )
+    print(  Gv.dst_TopoFile , flush=True )
     dsTopo_CAM=xr.open_dataset( Gv.dst_TopoFile )
     varsCAM  = list( dsTopo_CAM.variables )
     if (IC_for_pg==False):
@@ -188,10 +204,16 @@ def prep(Dst = 'ne30pg3', DstVgrid='L58',  Src='ERA5', WOsrf=False , RegridMetho
 
 
     vCAM=xr.open_dataset( Gv.dstVgridFile )
-    Gv.amid_CAM = vCAM['hyam'].values
-    Gv.bmid_CAM = vCAM['hybm'].values
-    Gv.aint_CAM = vCAM['hyai'].values
-    Gv.bint_CAM = vCAM['hybi'].values
+    if ( Gv.dstVgridFile not in ['L58_mpas','L93_mpas'] ):
+        Gv.amid_CAM = vCAM['hyam'].values
+        Gv.bmid_CAM = vCAM['hybm'].values
+        Gv.aint_CAM = vCAM['hyai'].values
+        Gv.bint_CAM = vCAM['hybi'].values
+    else: 
+        # Read in mpas zgrid - transpose and flip in the vertical
+        Gv.zgrid_CAM = vCAM['zgrid'].values.T
+        Gv.zgrid_CAM =  Gv.zgrid_CAM[::-1,:]     # x_flip = x[::-1, :]
+        #topo_x = np.tile( topo, (nt,1) ).reshape(nt,ncol)
 
     print( f" Src scripfile {Gv.src_scrip} " )
     print( f" Dst scripfile {Gv.dst_scrip} " )

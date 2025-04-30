@@ -268,6 +268,140 @@ def write_netcdf( version='' ):
 
     code = 1
     return code
+    
+def write_netcdf_mpas_nudging( version='' ):
+
+    
+    pdTime_ERA = Gv.pdTime_ERA
+    
+    aint_CAM = Gv.aint_CAM
+    bint_CAM = Gv.bint_CAM    
+    amid_CAM = Gv.amid_CAM
+    bmid_CAM = Gv.bmid_CAM
+    
+    lon_CAM = Gv.lon_CAM    
+    lat_CAM = Gv.lat_CAM
+    
+    area_CAM = Gv.area_CAM
+    phis_CAM = Gv.phis_CAM
+    phis_ERA_xCAM = Gv.phis_ERA_xCAM
+    ps_CAM = Gv.ps_CAM
+    
+    te_ERA_xzCAM = Gv.te_ERA_xzCAM
+    q_ERA_xzCAM  = Gv.q_ERA_xzCAM
+    u_ERA_xzCAM  = Gv.u_ERA_xzCAM
+    v_ERA_xzCAM  = Gv.v_ERA_xzCAM
+    w_ERA_xzCAM  = Gv.w_ERA_xzCAM
+    
+    ntime = np.shape(pdTime_ERA)[0]
+    print(ntime)
+
+    if (Gv.output_base_dir is None) and (Gv.output_abs_dir is None):
+        user = os.getenv("USER")  
+        if (Gv.MySrc=="ERA5"):
+            SuperDir = f"/glade/campaign/cgd/amp/{user}/ERA5"
+        elif (Gv.MySrc=="ERAI"):
+            SuperDir = f"/glade/campaign/cgd/amp/{user}/ERAI"
+        else:
+            SuperDir = f"/glade/campaign/cgd/amp/{user}/MiscRegridding"
+        Bdiro=f"{SuperDir}/{Gv.MyDst}_phys/{Gv.MyDstVgrid}"
+    elif (Gv.output_base_dir is not None) and (Gv.output_abs_dir is None):
+        Bdiro=f"{Gv.output_base_dir}/{Gv.MyDst}_phys/{Gv.MyDstVgrid}"
+    elif (Gv.output_abs_dir is not None):
+        Bdiro=f"{Gv.output_abs_dir}"
+
+    #######
+    os.makedirs( Bdiro , exist_ok=True )
+
+    if (Gv.RegridMethod == "CONSERVE"):
+        version = version + 'rgC1'
+    elif (Gv.RegridMethod == "CONSERVE_2ND"):
+        version = version + 'rgC2'
+    elif (Gv.RegridMethod == "BILINEAR"):
+        version = version + 'rgBI'
+        
+    #version='test_netcdf4_default'
+    #Bfilo="/glade/derecho/scratch/juliob/ERA5/" + Gv.MyDst + "/" + Gv.MySrc +"_x_"+ Gv.MyDst + "_"+ Gv.MyDstVgrid + "_" + version 
+    Bfilo= Bdiro + "/" + Gv.MySrc +"_x_"+ Gv.MyDst + "_"+ Gv.MyDstVgrid + "_" + version 
+
+    
+    if (Gv.doWilliamsonOlson==True):
+        Bfilo = Bfilo + '_WO'
+
+    ilev = np.sum( Gv.area_CAM * Gv.zgrid_CAM[0,:,:], axis=1 )/np.sum( Gv.area_CAM , axis=0 )
+    lev  = np.sum( Gv.area_CAM * Gv.zgrido_CAM[0,:,:], axis=1 )/np.sum( Gv.area_CAM , axis=0 )
+
+
+
+    if (Gv.dstTZHkey == 'tzc' ):
+        nt,nz,ncol = np.shape( te_ERA_xzCAM )
+        for itim in np.arange( ntime ):
+            dims   = ["ncol","time","lev","ilev"]
+            coords = dict( 
+                lon  = ( ["ncol"],lon_CAM ),
+                lat  = ( ["ncol"],lat_CAM ),
+                lev  = ( ["lev"],lev),
+                ilev = ( ["ilev"],ilev),
+                time = ( ["time"],  np.array(itim ,ndmin=1 ,dtype=np.int32 ) ), #pd.to_datetime( pdTime_ERA[itim] ) ),
+            )
+        
+            Wds = xr.Dataset( coords=coords  )
+            #Wds["TimeStamp"] = np.array( [itim * 24./ntime] ).astype( np.int32)  # pd.to_datetime( pdTime_ERA[itim] )
+            Wds["TimeStamp"] = pd.to_datetime( pdTime_ERA[itim] )
+            Wds["P_00"] = 100_000.
+        
+            Dar = xr.DataArray( data=phis_CAM, dims=('ncol',),
+                                attrs=dict( description='Surface Geopotential Height',units='m+2 s-2',) ,) 
+            Wds['PHIS'] = Dar
+
+            Dar = xr.DataArray( data=phis_ERA_xCAM, dims=('ncol',),
+                                attrs=dict( description='ERA Surface Geopotential Height',units='m+2 s-2',) ,) 
+            Wds['PHIS_ERA'] = Dar
+
+            Dar = xr.DataArray( data=ps_CAM[itim,:].reshape(1,ncol), 
+                                dims=('time','ncol',),
+                                attrs=dict( description='Surface Pressure',units='Pa',) ,) 
+            Wds['PS'] = Dar
+    
+            Dar = xr.DataArray( data=te_ERA_xzCAM[itim,:,:].reshape(1,nz,ncol), 
+                                dims=('time','lev','ncol',),
+                                attrs=dict( description='Air Temperature',units='K',) ,) 
+            Wds['T'] = Dar
+
+            Dar = xr.DataArray( data=q_ERA_xzCAM[itim,:,:].reshape(1,nz,ncol), 
+                                dims=('time','lev','ncol',),
+                                attrs=dict( description='specific humidity',units='kg kg-1',) ,) 
+            Wds['Q'] = Dar
+        
+            Dar = xr.DataArray( data=u_ERA_xzCAM[itim,:,:].reshape(1,nz,ncol), 
+                                dims=('time','lev','ncol',),
+                                attrs=dict( description='X-wind',units='m s-1',) ,) 
+            Wds['U'] = Dar
+
+            Dar = xr.DataArray( data=v_ERA_xzCAM[itim,:,:].reshape(1,nz,ncol), 
+                                dims=('time','lev','ncol',),
+                                attrs=dict( description='Y-wind',units='m s-1',) ,) 
+            Wds['V'] = Dar
+
+            Dar = xr.DataArray( data=w_ERA_xzCAM[itim,:,:].reshape(1,nz,ncol), 
+                                dims=('time','lev','ncol',),
+                                attrs=dict( description='Vertical motion',units='Pa s-1',) ,) 
+            Wds['W'] = Dar
+
+            yymmdd = str(pdTime_ERA[itim])[0:10]
+            hr=str(pdTime_ERA[itim])[11:13]
+            ss = str(int(hr)*3600).zfill(5)
+            timetag =  yymmdd+'-'+ss
+            filo= Bfilo + "." + timetag+ ".nc"
+            print( filo )
+            Wds.to_netcdf( filo  ) #, format="NETCDF3_64BIT" , engine='scipy' ) #,format="NETCDF3_CLASSIC" )
+    else:
+        print( "you shouldn't be here   .... " )
+
+
+    code = 1
+    return code
+
 
 def ExFromGv():
     

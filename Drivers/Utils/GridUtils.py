@@ -121,6 +121,9 @@ def gridInfo( grid=None , **kwargs ):
         if (Vgrid == 'L32' ):
             # 32-level CAM6 grid
             VgridFile = f'{myGridFiles}/Vertical/GRID_32L_CAM6.nc'
+        if (Vgrid == 'L58_mpas' ):
+            # Read in CAM L58 vertical grid
+            VgridFile = f'{cesm_inputdata_dir}/atm/cam/inic/mpas/cami_01-01-2000_00Z_mpasa120_L58_CFSR_c240814.nc'
     else:
         VgridFile = ''
 
@@ -255,6 +258,13 @@ def gridInfo( grid=None , **kwargs ):
         type='mesh'
         scrip = myGridFiles+'/Scrip/MESO03_ne30x4_np4_SCRIP.nc'
         TopoFile = 'N/A'
+        p_00 = 100_000.
+
+    elif (grid == 'mpasa120'):
+        Hkey = 'c'
+        type='mesh'
+        scrip = cesm_inputdata_dir+'share/scripgrids/mpasa120_SCRIP_desc_211008.nc'
+        TopoFile = cesm_inputdata_dir+'atm/cam/topo/mpas/mpasa120_gmted2010_modis_bedmachine_nc3000_Laplace0100_noleak_20240507.nc'
         p_00 = 100_000.
 
     elif ((grid == 'fv0.9x1.25') or (grid=='fv1x1')):

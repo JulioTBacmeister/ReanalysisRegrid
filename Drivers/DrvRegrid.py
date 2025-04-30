@@ -19,7 +19,7 @@ importlib.reload( Rd )
 
 
 
-def main(year, month, day, hour, Dst, DstVgrid, Src, IC_for_pg, RegridMethod = 'CONSERVE'):
+def main(year, month, day, hour, Dst, DstVgrid, Src, IC_for_pg, mpas_nudging, frequency, override_topofile_with,  RegridMethod = 'CONSERVE'):
     import calendar
     
     tic_total = time.perf_counter()
@@ -42,22 +42,39 @@ def main(year, month, day, hour, Dst, DstVgrid, Src, IC_for_pg, RegridMethod = '
         print(f'  {IC_for_pg}: This is making an IC file for {Dst} ' )
 
 
-    ret1 = Init.prep(Dst=Dst, DstVgrid=DstVgrid ,Src=Src, WOsrf=True, RegridMethod=RegridMethod , IC_for_pg=IC_for_pg )
+    ret1 = Init.prep(Dst=Dst, DstVgrid=DstVgrid ,Src=Src, WOsrf=True, RegridMethod=RegridMethod , IC_for_pg=IC_for_pg, mpas_nudging=mpas_nudging, override_topofile_with=override_topofile_with )
     sys.stdout.flush()
     if (day==99):
         for iday in np.arange( days_in_month):
-            ret2 = Rd.get_Src( year=year ,month=month ,day=iday+1 , hour0=99 )
+            ret2 = Rd.get_Src( year=year ,month=month ,day=iday+1 , hour0=99 , frequency=frequency )
             sys.stdout.flush()
+            if (Dst not in ['mpasa120','mpasa60',]):
+                ret3 = GnR.xRegrid(HorzInterpLnPs=lnPS )
+                sys.stdout.flush()
+                ret4 = Wrt.write_netcdf(version=ver) #+'Test01')
+            else:
+                ret3 = GnR.xRegrid_mpas_phys(HorzInterpLnPs=lnPS )
+                sys.stdout.flush()
+                if (mpas_nudging==True):
+                    ret4 = Wrt.write_netcdf_mpas_nudging(version=ver) #+'Test01')
+                else:
+                    raise SystemExit("Don't know what to do - Not mpas nudging - no mpas IC infrastructure yet. Stopping now.")
+
+    else:
+        ret2 = Rd.get_Src( year=year ,month=month ,day=day , hour0=hour, frequency=frequency )
+        sys.stdout.flush()
+        if (Dst not in ['mpasa120','mpasa60',]):
             ret3 = GnR.xRegrid(HorzInterpLnPs=lnPS )
             sys.stdout.flush()
             ret4 = Wrt.write_netcdf(version=ver) #+'Test01')
+        else:
+            ret3 = GnR.xRegrid_mpas_phys(HorzInterpLnPs=lnPS )
+            sys.stdout.flush()
+            if (mpas_nudging==True):
+                ret4 = Wrt.write_netcdf_mpas_nudging(version=ver) #+'Test01')
+            else:
+                raise SystemExit("Don't know what to do - Not mpas nudging - no mpas IC infrastructure yet. Stopping now.")
 
-    else:
-        ret2 = Rd.get_Src( year=year ,month=month ,day=day , hour0=hour )
-        sys.stdout.flush()
-        ret3 = GnR.xRegrid(HorzInterpLnPs=lnPS )
-        sys.stdout.flush()
-        ret4 = Wrt.write_netcdf(version=ver) #+'Test01')
         
     code = 1
     toc_total = time.perf_counter()

@@ -8,6 +8,7 @@ import numpy as np
 # Physical Constants
 Rgas = Con.Rdry() # 287.0 # J K-1 kg-1
 grav = Con.grav() # 9.8
+vireps = Con.vireps() # 0.622
 
 #####################
 # Notes.
@@ -75,30 +76,49 @@ def Pressure ( am, bm, ai, bi, ps , p_00=100_000., Gridkey='tzc' ):
  
     return pmid,pint,delp
 
-def GeopHeight( te, delp, pmid, topo=None , Gridkey='tzc'):
+def GeopHeight( te=None, pint=None, pmid=None, qv=None, topo=None , Gridkey='tzc'):
 
-    rho= pmid/(Rgas*te)
-    delz= delp/(grav*rho)
-    
+    #rho= pmid/(Rgas*te)
+    #delz= delp/(grav*rho)
+
+    # virtual temperature in terms of specific humidity
+    if (qv is not None):
+        tevir = ( (qv/vireps) + (1.-qv) )* te
+    else:
+        tevir =te
+        
     if (Gridkey=='tzc'):
         nt,nz,ncol=np.shape( te )
+        delz = np.zeros((nt,nz,ncol))
+        for z in np.arange( start=0, stop=nz ):
+            #delz[:,z,:] = (Rgas*tevir[:,z,:]/grav) * ( np.log( pint[:,z+1,:] ) - np.log( pint[:,z,:] ) )
+            delz[:,z,:] = (Rgas*tevir[:,z,:]/grav) * ( pint[:,z+1,:] - pint[:,z,:]  ) / pmid[:,z,:]  
         z3e=np.zeros((nt,nz+1,ncol))
         if (topo is None):
             topo_x = np.zeros( (nt,ncol) )
         else:
-            topo_x = np.tile( topo, (nt,1) )
+            topo_x = np.tile( topo, (nt,1) ).reshape(nt,ncol)
         z3e[:,nz,:]=topo_x
         for z in np.arange( start=nz-1,stop=-1,step=-1):
             z3e[:,z,:] = z3e[:,z+1,:] + delz[:,z,:]   #/(grav*rho[:,z,:])
-            ##z3e[:,z,:] = z3e[:,z+1,:] + delz[:,z,:]   #/(grav*rho[:,z,:])
-
-        # Add topo_x to all levels of z3e
-        #z3e += topo_x[:, None, :]
-
         z3o = 0.5*( z3e[:,1:,:]+z3e[:,0:-1,:]  )
     
     elif (Gridkey=='tzyx'):
         nt,nz,ny,nx=np.shape( te )
+        delz = np.zeros((nt,nz,ny,nx))
+        for z in np.arange( start=0,stop=nz ):
+            #delz[:,z,:,:] = (Rgas*tevir[:,z,:,:]/grav) * ( np.log( pint[:,z+1,:,:] ) - np.log( pint[:,z,:,:] ) )
+            #delz[:,z,:,:] = (Rgas*tevir[:,z,:,:]/grav) * ( pint[:,z+1,:,:] - pint[:,z,:,:]  ) / (0.5*( pint[:,z+1,:,:]  + pint[:,z,:,:] ) ) 
+            delz[:,z,:,:] = (Rgas*tevir[:,z,:,:]/grav) * ( pint[:,z+1,:,:] - pint[:,z,:,:]  ) / pmid[:,z,:,:] 
+        z3e=np.zeros((nt,nz+1,ny,nx))
+        if (topo is None):
+            topo_x = np.zeros( (nt,ny,nx) )
+        else:
+            topo_x = np.tile( topo, (nt,1) ).reshape(nt,ny,nx)
+        z3e[:,nz,:,:]=topo_x
+        for z in np.arange( start=nz-1,stop=-1,step=-1):
+            z3e[:,z,:,:] = z3e[:,z+1,:,:] + delz[:,z,:,:]   #/(grav*rho[:,z,:])
+        z3o = 0.5*( z3e[:,1:,:,:]+z3e[:,0:-1,:,:]  )
     elif (Gridkey=='zyx'):
         nz,ny,nx=np.shape( te )
     elif (Gridkey=='zc'):
@@ -106,6 +126,32 @@ def GeopHeight( te, delp, pmid, topo=None , Gridkey='tzc'):
 
     return z3e,z3o
 
+def Press_from_ZTQ( te=None, z3e=None, qv=None, ps=None,  Gridkey='tzc'):
+
+    #rho= pmid/(Rgas*te)
+    #delz= delp/(grav*rho)
+
+    # virtual temperature in terms of specific humidity
+    if (qv is not None):
+        tevir = ( (qv/vireps) + (1.-qv) )* te
+    else:
+        tevir =te
+
+    Hp = Rgas * tevir / grav
+    
+    if (Gridkey=='tzc'):
+        nt,nz,ncol=np.shape( te )
+        delz = np.zeros((nt,nz,ncol))
+        pint = np.zeros((nt,nz+1,ncol))
+        pint[:,nz,:] = ps[:,:]
+        for z in np.arange( start=0, stop=nz ):
+            delz[:,z,:] = ( z3e[:,z+1,:] - z3e[:,z,:]  )
+        for z in np.arange(  start=nz-1,stop=-1,step=-1 ):
+            pint[:,z,:] = pint[:,z+1,:] * ( 1.0 + 0.5*delz[:,z,:]/Hp[:,z,:] ) / ( 1.0 - 0.5*delz[:,z,:]/Hp[:,z,:] )
+        pmid = 0.5*( pint[:,1:,:]+pint[:,0:-1,:]  )
+        delp = 0.5*( pint[:,1:,:]-pint[:,0:-1,:]  )
+
+    return pmid,pint,delp
 
 def TandP150 ( te, pmid, delp, search_up_L=10, Gridkey='tzc', findHt=150. ):
     # Function finds vertical index of first mid level abov 150m (or findHt)

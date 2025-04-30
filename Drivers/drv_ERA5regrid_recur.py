@@ -45,7 +45,11 @@ def main():
         Gv.output_base_dir = config['Output_base_dir']
     if ('Output_abs_dir' in config):
         Gv.output_abs_dir = config['Output_abs_dir']
-    
+    if ('Override_topofile_with' in config):
+        override_topofile_with = config['Override_topofile_with']
+    else:
+        override_topofile_with = None
+
     theYear = config['TheProcYear']
     # Destination grid
     Dst=config['Dst']
@@ -67,7 +71,7 @@ def main():
     elif (Dst == 'ne30pg3'):
         BestRegridMethod = 'CONSERVE_2ND' 
     else:
-        BestRegridMethod = 'CONSERVE' 
+        BestRegridMethod = 'CONSERVE_2ND' 
 
     print(f' "I" have decided that the best regrid method is {BestRegridMethod}')
     
@@ -75,7 +79,9 @@ def main():
     # ...
     #. ./DrvRegrid.py --year=2000 --month=$month --day=99 --hour=99 --Dst='ne30pg3' --DstVgrid='L93'
     
-    DR.main( year=config['year'] , month=config['month'] , day=config['day'], hour=config['hour'] , Dst=config['Dst'] , DstVgrid=config['DstVgrid'] , IC_for_pg=config['IC_for_pg'], Src='ERA5' , RegridMethod=BestRegridMethod )
+    DR.main( year=config['year'] , month=config['month'] , day=config['day'], hour=config['hour'] , Dst=config['Dst'] , DstVgrid=config['DstVgrid'] ,
+            IC_for_pg=config['IC_for_pg'], Src='ERA5' , mpas_nudging=config['mpas_nudging'], frequency=config['frequency'], 
+            override_topofile_with=override_topofile_with, RegridMethod=BestRegridMethod )
     
     #------------------------------
     if (config['StepBy'].lower() == 'day'):
