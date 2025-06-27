@@ -14,10 +14,11 @@ import time as TimeUtil
 
 from Regridder.GlobalVarClass import Gv
 
+import subprocess
+from pathlib import Path
 
 
 def write_netcdf( version='' ):
-
     
     pdTime_ERA = Gv.pdTime_ERA
     
@@ -96,10 +97,25 @@ def write_netcdf( version='' ):
             Wds = xr.Dataset( coords=coords  )
             #Wds["TimeStamp"] = np.array( [itim * 24./ntime] ).astype( np.int32)  # pd.to_datetime( pdTime_ERA[itim] )
 
+            #-------------------------------------
+            # respository info for metadata
+            #-------------------------------------
+            hash_full  = git_cmd("rev-parse", "HEAD", repo=repo_path)
+            hash_short = git_cmd("rev-parse", "--short", "HEAD", repo=repo_path)
+            describe   = git_cmd("describe", "--tags", "--dirty", "--always", repo=repo_path)
+            remote_url = git_cmd("config", "--get", "remote.origin.url", repo=repo_path)
+            branch     = git_cmd("rev-parse", "--abbrev-ref", "HEAD", repo=repo_path)
+            dirty      = bool(git_cmd("status", "--porcelain", repo=repo_path))
+
             # ── add / update global attributes ──────────────────────────────
-            # Wds.assign_attrs(topofile=Gv.dst_TopoFile )
             Wds.attrs["topofile"] =Gv.dst_TopoFile
             Wds.attrs["RegridMethod"] =Gv.RegridMethod
+            Wds.attrs["github_url"] =remote_url
+            Wds.attrs["github_hash"] =hash_full
+            Wds.attrs["github_branch"] =branch
+            Wds.attrs["github_more_info"] =describe
+
+            
 
             
             Wds["TimeStamp"] = pd.to_datetime( pdTime_ERA[itim] )
@@ -435,7 +451,11 @@ def ExFromGv():
     v_ERA_xzCAM  = Gv.v_ERA_xzCAM
     w_ERA_xzCAM  = Gv.w_ERA_xzCAM
     
-    
+def git_cmd(*args, repo="."):
+    return subprocess.check_output(
+        ["git", "-C", str(repo), *args], text=True
+    ).strip()
+
     
     
     
