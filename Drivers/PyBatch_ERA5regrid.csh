@@ -27,5 +27,11 @@ conda activate npl-2025a
 # Nothing to do here.
 #--------------------------------------
 echo "Cruising .... "
+
+# remove logs that are more than 15 minutes old.
+#-----------------------------------------------
+find . -type f -name "ERA5proc.o*" -mmin +15 -exec rm {} \;
+
+
 ./drv_ERA5regrid_recur.py
 

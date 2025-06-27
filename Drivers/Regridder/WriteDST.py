@@ -91,9 +91,16 @@ def write_netcdf( version='' ):
                 ilev = ( ["ilev"],ilev),
                 time = ( ["time"],  np.array(itim ,ndmin=1 ,dtype=np.int32 ) ), #pd.to_datetime( pdTime_ERA[itim] ) ),
             )
-        
+
+
             Wds = xr.Dataset( coords=coords  )
             #Wds["TimeStamp"] = np.array( [itim * 24./ntime] ).astype( np.int32)  # pd.to_datetime( pdTime_ERA[itim] )
+
+            # ── add / update global attributes ──────────────────────────────
+            # Wds.assign_attrs(topofile=Gv.dst_TopoFile )
+            Wds.attrs["topofile"] =Gv.dst_TopoFile
+
+            
             Wds["TimeStamp"] = pd.to_datetime( pdTime_ERA[itim] )
             Wds["P_00"] = 100_000.
         
