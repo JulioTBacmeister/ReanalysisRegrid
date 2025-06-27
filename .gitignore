@@ -6,3 +6,5 @@
 */*/__pycache__
 */__pycache__
 __pycache__
+Drivers/ERA5proc.o*
+Drivers/config_ERA5regrid.yaml

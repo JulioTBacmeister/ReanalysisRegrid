@@ -99,6 +99,7 @@ def write_netcdf( version='' ):
             # ── add / update global attributes ──────────────────────────────
             # Wds.assign_attrs(topofile=Gv.dst_TopoFile )
             Wds.attrs["topofile"] =Gv.dst_TopoFile
+            Wds.attrs["RegridMethod"] =Gv.RegridMethod
 
             
             Wds["TimeStamp"] = pd.to_datetime( pdTime_ERA[itim] )
