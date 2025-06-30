@@ -100,6 +100,7 @@ def write_netcdf( version='' ):
             #-------------------------------------
             # respository info for metadata
             #-------------------------------------
+            repo_path = Path("../")  # adjust
             hash_full  = git_cmd("rev-parse", "HEAD", repo=repo_path)
             hash_short = git_cmd("rev-parse", "--short", "HEAD", repo=repo_path)
             describe   = git_cmd("describe", "--tags", "--dirty", "--always", repo=repo_path)
