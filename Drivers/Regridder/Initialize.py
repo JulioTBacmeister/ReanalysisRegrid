@@ -74,7 +74,8 @@ def prep(Dst = 'ne30pg3', DstVgrid='L58',  Src='ERA5', WOsrf=False , RegridMetho
 
     cesm_inputdata_dir = '/glade/campaign/cesm/cesmdata/cseg/inputdata/'
     #my_bndtopo = 
-    print( f"In prep Src= {Src} to Dst={Dst} " )
+    print( f"In prep: Src= {Src} to Dst={Dst} ", flush=True  )
+    print( f'In prep: vertical grid is {Gv.MyDstVgrid}', flush=True )
 
     DstInfo = GrU.gridInfo(Dst,Vgrid=DstVgrid, IC_for_pg= IC_for_pg )
     Gv.dstHkey = DstInfo['Hkey']
@@ -86,7 +87,7 @@ def prep(Dst = 'ne30pg3', DstVgrid='L58',  Src='ERA5', WOsrf=False , RegridMetho
     # Override topofile with a user-specified one
     #---------------------------------------------
     if (override_topofile_with is not None):
-        print( f"User beware... Topofile is being overridden with - " )
+        print( f"User beware... Topofile is being overridden with - " , flush=True )
         print( f"{override_topofile_with}")
         Gv.dst_TopoFile = override_topofile_with
         
@@ -98,7 +99,7 @@ def prep(Dst = 'ne30pg3', DstVgrid='L58',  Src='ERA5', WOsrf=False , RegridMetho
     Gv.src_scrip =SrcInfo['scrip']
     Gv.src_TopoFile = SrcInfo['TopoFile']
     Gv.p_00_ERA = SrcInfo['p_00']
-    print( f"Used NEW, concise gridInfo function .... ...." )
+    print( f"Used NEW, concise gridInfo function .... ...." , flush=True )
 
     
 
@@ -124,7 +125,6 @@ def prep(Dst = 'ne30pg3', DstVgrid='L58',  Src='ERA5', WOsrf=False , RegridMetho
     # lives in the neXXpg3 topo file under a different name:
     #      PHIS_gll
     # ----------------------------------------------
-    print(  "Why is this bombing ???" , flush=True )
     print(  Gv.dst_TopoFile , flush=True )
     dsTopo_CAM=xr.open_dataset( Gv.dst_TopoFile )
     varsCAM  = list( dsTopo_CAM.variables )
@@ -132,7 +132,7 @@ def prep(Dst = 'ne30pg3', DstVgrid='L58',  Src='ERA5', WOsrf=False , RegridMetho
         Gv.phis_CAM = dsTopo_CAM['PHIS'].values
     else:
         Gv.phis_CAM = dsTopo_CAM['PHIS_gll'].values
-        print(f'   -- Making Initial Condition file for pg3 analog of {Dst}. Using PHIS_gll in TopoFile' )
+        print(f'   -- Making Initial Condition file for pg3 analog of {Dst}. Using PHIS_gll in TopoFile' , flush=True )
     #---------------------------------------
     # It would be cleaner to get lat,lon directly
     # from the SCRIP file
@@ -202,9 +202,12 @@ def prep(Dst = 'ne30pg3', DstVgrid='L58',  Src='ERA5', WOsrf=False , RegridMetho
                                     RegridMethod = RegridMethod )
     
 
-
+    #---------------------------------------------------
+    # Get vertical grid information
+    #---------------------------------------------------
+    print( f'In Prep: Again, vertical grid file is {Gv.dstVgridFile}', flush=True )
     vCAM=xr.open_dataset( Gv.dstVgridFile )
-    if ( Gv.dstVgridFile not in ['L58_mpas','L93_mpas'] ):
+    if ( Gv.MyDstVgrid not in ['L58_mpas','L93_mpas'] ):
         Gv.amid_CAM = vCAM['hyam'].values
         Gv.bmid_CAM = vCAM['hybm'].values
         Gv.aint_CAM = vCAM['hyai'].values
@@ -215,16 +218,16 @@ def prep(Dst = 'ne30pg3', DstVgrid='L58',  Src='ERA5', WOsrf=False , RegridMetho
         Gv.zgrid_CAM =  Gv.zgrid_CAM[::-1,:]     # x_flip = x[::-1, :]
         #topo_x = np.tile( topo, (nt,1) ).reshape(nt,ncol)
 
-    print( f" Src scripfile {Gv.src_scrip} " )
-    print( f" Dst scripfile {Gv.dst_scrip} " )
-    print( f" Src topo file {Gv.src_TopoFile} " )
-    print( f" Dst topo file {Gv.dst_TopoFile} " )
-    print( f" {DstVgrid} Dst vertical grid from {Gv.dstVgridFile} " )
+    print( f" Src scripfile {Gv.src_scrip} " , flush=True  )
+    print( f" Dst scripfile {Gv.dst_scrip} " , flush=True  )
+    print( f" Src topo file {Gv.src_TopoFile} " , flush=True  )
+    print( f" Dst topo file {Gv.dst_TopoFile} " , flush=True )
+    print( f" {DstVgrid} Dst vertical grid from {Gv.dstVgridFile} " , flush=True )
 
 
     toc = time.perf_counter()
     pTime = f"Prepping for {Src} to {Dst} proc in {__name__} took  {toc - tic_overall:0.4f} seconds"
-    print(pTime)
+    print(pTime , flush=True )
  
     code = 1
     return code

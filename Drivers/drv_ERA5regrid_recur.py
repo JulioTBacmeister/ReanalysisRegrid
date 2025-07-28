@@ -41,6 +41,17 @@ def main():
     config = uc.read_config_yaml( file_path )
     print( config )
 
+    # -----------------------------------------
+    # Should have some consitency checks ...
+    #------------------------------------------
+    if (config['Dst'] in ['mpasa120','mpasa60',] ):
+        if ( config['DstVgrid'] in ['L58_mpas', 'L93_mpas' ] ):
+            print( f"COngratulations !!! you have a valid MPAS Vertical Grid ")
+        else:
+            raise RuntimeError(f"Your vertical grid - '{config['DstVgrid']}' - wont work with MPAS — aborting.")
+            
+
+
     if ('Output_base_dir' in config):
         Gv.output_base_dir = config['Output_base_dir']
     if ('Output_abs_dir' in config):
@@ -72,6 +83,7 @@ def main():
         BestRegridMethod = 'CONSERVE_2ND' 
     else:
         BestRegridMethod = 'CONSERVE_2ND' 
+
 
     print(f' "I" have decided that the best regrid method is {BestRegridMethod}')
     

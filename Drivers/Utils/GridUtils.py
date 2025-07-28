@@ -124,6 +124,9 @@ def gridInfo( grid=None , **kwargs ):
         if (Vgrid == 'L58_mpas' ):
             # Read in CAM L58 vertical grid
             VgridFile = f'{cesm_inputdata_dir}/atm/cam/inic/mpas/cami_01-01-2000_00Z_mpasa120_L58_CFSR_c240814.nc'
+        if (Vgrid == 'L93_mpas' ):
+            # Read in CAM L58 vertical grid
+            VgridFile = f'{cesm_inputdata_dir}/atm/cam/inic/mpas/cami_01-01-2000_00Z_mpasa120_L93_CFSR_c240814.nc'
     else:
         VgridFile = ''
 
