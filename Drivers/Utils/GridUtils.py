@@ -270,6 +270,13 @@ def gridInfo( grid=None , **kwargs ):
         TopoFile = cesm_inputdata_dir+'atm/cam/topo/mpas/mpasa120_gmted2010_modis_bedmachine_nc3000_Laplace0100_noleak_20240507.nc'
         p_00 = 100_000.
 
+    elif (grid == 'GlacierNP'):
+        Hkey = 'c'
+        type='mesh'
+        scrip = '/glade/work/juliob/GridFiles/Scrip/ne0np4.glacier.ne30x16_np4_SCRIP.nc'
+        TopoFile = '/glade/work/juliob/GridFiles/Topo/topo_ne0np4.glacier.ne30x16.nc'
+        p_00 = 100_000.
+
     elif ((grid == 'fv0.9x1.25') or (grid=='fv1x1')):
         Hkey = 'yx'
         type='grid'

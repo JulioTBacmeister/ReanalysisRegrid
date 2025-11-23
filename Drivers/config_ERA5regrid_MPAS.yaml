@@ -1,0 +1,14 @@
+Dst: mpasa120
+DstVgrid: L93_mpas
+IC_for_pg: false
+Output_base_dir: /glade/derecho/scratch/juliob/mpas_nudg_202507/
+Resubmit: -1
+StepBy: hour
+StepN: 6
+TheProcYear: -1
+day: 8
+frequency: 1
+hour: 18
+month: 1
+mpas_nudging: true
+year: 1985
