@@ -1,10 +1,12 @@
 #############################################################
-# copy this file to 'config_ERA5regrid.yaml' and edit to 
-# your specifications
+# Copy this file to 'config_ERA5regrid.yaml' and edit to 
+# your specifications.
 #############################################################
-Dst: ne30np4  # destination horizontal grid e.g. ne30pg3, fv1x1, ne30np4 .....
-DstVgrid: L93 # destination vertical grid, e.g., L93 (MT), L58 (LT) ....
-IC_for_pg: True # Not relevant unless Dst=ne{...}np4. In this case True will generate ICs for equiv ne{...}pg3 grid
+# Required inputs:
+#############################################################
+Dst: ne30pg3  # destination horizontal grid e.g. ne30pg3, fv1x1, ne30np4 .....
+DstVgrid: L93 # destination vertical grid, e.g., L93 (MT), L58 (LT) ... Note MPAS requires its own vertical grids
+IC_for_pg: False # Not relevant unless Dst=ne{...}np4. In this case True will generate ICs for equiv ne{...}pg3 grid
 Resubmit: 1
 StepBy: month
 StepN: 1
@@ -12,23 +14,22 @@ hour: 0
 day: 1
 month: 1
 year: 2000
-frequency: 6
+frequency: 1 # can be either 1 or 6 for ERA5: 1 gives hourly results; 6 gives results at 0Z, 6Z, 12Z and 18Z
 mpas_nudging: false # needs to be set ;( , but is only relevant when mpas Dst grids are specified 
 #############################################################
-# Optional settings. 
-# If line is eliminated or blank after colon,
-# defaults will be used.
+# Optional inputs: 
+# If line is eliminated or left blank after colon, defaults will be used.
 #############################################################
-# Output directories:
-# if neither of the next 2 fields is set, output will go to /glade/campaign/cgd/amp/{user}/ERA5
+#   Output directories:
+#   if neither of the next 2 fields is set, output will go to /glade/campaign/cgd/amp/{user}/ERA5
 #############################################################
-Output_base_dir: path # Base directory for output. Output files will go to {output_base_dir}/{Dst}/{DstVgrid}
-Output_abs_dir: path # ABSOLUTE directory for output. Output files will go to {output_abs_dir}. Overrides all other settings.
+Output_base_dir:  # Base directory for output. Output files will go to {output_base_dir}/{Dst}/{DstVgrid}
+Output_abs_dir:  # ABSOLUTE directory for output. Output files will go to {output_abs_dir}. Overrides all other settings.
 ##############################################################
-# Topo:
-# If set, user spec topo file overrides default
+#   Topo:
+#   If set, user spec topo file overrides default
 ##############################################################
-Override_topofile_with: path
+Override_topofile_with:  # give abolute path to a topo file
 ################
 # Deprecated settings ....
 ################
