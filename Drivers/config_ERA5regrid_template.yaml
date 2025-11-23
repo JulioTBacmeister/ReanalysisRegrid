@@ -1,15 +1,35 @@
-Dst: ne30np4
-DstVgrid: L93
-IC_for_pg: true
-Output_base_dir: /glade/derecho/scratch/juliob/rough_topo_ICs_c202506/
-Override_topofile_with: /glade/campaign/cgd/amp/pel/topo/cesm3/ne30pg3_gmted2010_modis_bedmachine_nc3000_Laplace0050_noleak_20250325.nc
-Resubmit: 743
+#############################################################
+# copy this file to 'config_ERA5regrid.yaml' and edit to 
+# your specifications
+#############################################################
+Dst: ne30np4  # destination horizontal grid e.g. ne30pg3, fv1x1, ne30np4 .....
+DstVgrid: L93 # destination vertical grid, e.g., L93 (MT), L58 (LT) ....
+IC_for_pg: True # Not relevant unless Dst=ne{...}np4. In this case True will generate ICs for equiv ne{...}pg3 grid
+Resubmit: 1
 StepBy: month
-StepN: 3
-TheProcYear: -1
-day: 1
-frequency: 6
+StepN: 1
 hour: 0
-month: 6
-mpas_nudging: false
+day: 1
+month: 1
 year: 2000
+frequency: 6
+mpas_nudging: false # needs to be set ;( , but is only relevant when mpas Dst grids are specified 
+#############################################################
+# Optional settings. 
+# If line is eliminated or blank after colon,
+# defaults will be used.
+#############################################################
+# Output directories:
+# if neither of the next 2 fields is set, output will go to /glade/campaign/cgd/amp/{user}/ERA5
+#############################################################
+Output_base_dir: path # Base directory for output. Output files will go to {output_base_dir}/{Dst}/{DstVgrid}
+Output_abs_dir: path # ABSOLUTE directory for output. Output files will go to {output_abs_dir}. Overrides all other settings.
+##############################################################
+# Topo:
+# If set, user spec topo file overrides default
+##############################################################
+Override_topofile_with: path
+################
+# Deprecated settings ....
+################
+TheProcYear: -1

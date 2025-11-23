@@ -61,7 +61,9 @@ def main():
     else:
         override_topofile_with = None
 
-    theYear = config['TheProcYear']
+    # Eliminate need to set this in config
+    theYear = config.get("TheProcYear") or -1
+
     # Destination grid
     Dst=config['Dst']
     
@@ -85,7 +87,7 @@ def main():
         BestRegridMethod = 'CONSERVE_2ND' 
 
 
-    print(f' "I" have decided that the best regrid method is {BestRegridMethod}')
+    print(f' "Best" regrid method is {BestRegridMethod}')
     
     # Add the regrid commands here:
     # ...
